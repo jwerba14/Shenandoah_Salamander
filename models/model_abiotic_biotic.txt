@@ -1,0 +1,207 @@
+
+model{
+
+############## Priors
+
+
+
+
+# 1. Abiotic biotic model ------------------------------------------
+
+
+
+alpha.psiSC ~ dnorm(0, 0.368)
+alpha.psiSc ~ dnorm(0, 0.368)
+alpha.psiC ~ dnorm(0, 0.368)
+
+# Intercept
+alpha.survAloneS ~ dnorm(0, 0.368)
+alpha.survBothS ~ dnorm(0, 0.368)
+alpha.colEmptyS ~ dnorm(0, 0.368)
+alpha.colOccS ~ dnorm(0, 0.368)
+
+# TEMP slope
+beta.survAloneS1 ~ dnorm(0, 0.368)
+beta.survBothS1 ~ dnorm(0, 0.368)
+beta.colEmptyS1 ~ dnorm(0, 0.368)
+beta.colOccS1 ~ dnorm(0, 0.368)
+
+# RMI slope
+beta.survAloneS2 ~ dnorm(0, 0.368)
+beta.survBothS2 ~ dnorm(0, 0.368)
+beta.colEmptyS2 ~ dnorm(0, 0.368)
+beta.colOccS2 ~ dnorm(0, 0.368)
+
+# Intercept
+alpha.survAloneC ~ dnorm(0, 0.368)
+alpha.survBothC ~ dnorm(0, 0.368)
+alpha.colEmptyC ~ dnorm(0, 0.368)
+alpha.colOccC ~ dnorm(0, 0.368)
+
+# TEMP slope
+beta.survAloneC1 ~ dnorm(0, 0.368)
+beta.survBothC1 ~ dnorm(0, 0.368)
+beta.colEmptyC1 ~ dnorm(0, 0.368)
+beta.colOccC1 ~ dnorm(0, 0.368)
+
+# RMI slope
+beta.survAloneC2 ~ dnorm(0, 0.368)
+beta.survBothC2 ~ dnorm(0, 0.368)
+beta.colEmptyC2 ~ dnorm(0, 0.368)
+beta.colOccC2 ~ dnorm(0, 0.368)
+
+############## Detection parameters- Assume constant across years
+
+alpha.pS ~ dnorm(0, 0.368)
+alpha.rSC~ dnorm(0, 0.368)
+alpha.rSc~ dnorm(0, 0.368)
+alpha.rC ~ dnorm(0, 0.368)
+alpha.pC ~ dnorm(0, 0.368)
+
+
+
+# 2. Abiotic model ------------------------------------------
+
+
+
+
+
+# 3. Biotic model ------------------------------------------
+
+
+
+
+
+
+###########################################
+###########  ECOLOGY MODEL ################
+###########################################
+
+## SEASON 1
+
+for(i in 1:N){    # Loop over sites
+  # True state model for the partially observed true state
+  # True occupancy z at site i  # Shenandoah sal
+  z[i,1] ~ dbern(psi.S[i])
+
+  psi.S[i] <- psiSC[i] * v[i,1] +
+              psiSc[i] * (1 - v[i,1])
+
+  logit(psiSC[i]) <- alpha.psiSC
+  logit(psiSc[i]) <- alpha.psiSc
+
+  # True occupancy v at site i  # Cinereus sal
+  v[i,1] ~ dbern(psiC[i])
+
+  logit(psiC[i]) <- alpha.psiC
+
+} #i
+
+## SEASON 2 & ON
+
+for(k in 2:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over sites
+
+    # True state model for the partially observed true state
+    z[i,k] ~ dbern(muz[i,k-1])		# True occupancy z at site i   # Shenandoah sal
+
+    v[i,k] ~ dbern(muv[i,k-1])		# True occupancy v at site i  # Cinereus sal
+
+    muz[i,k-1] <- z[i,k-1] * survAloneS[i, k-1] * (1-v[i,k-1]) +
+                  z[i,k-1] * survBothS[i, k-1]      * v[i,k-1] +
+                  (1- z[i,k-1]) * colEmptyS[i, k-1] * (1-v[i,k-1]) +
+                  (1- z[i,k-1]) * colOccS[i, k-1]   * v[i,k-1]
+
+    logit(survAloneS[i, k-1]) <- alpha.survAloneS + beta.survAloneS1 * TEMP[i] + beta.survAloneS2 * RMI[i]
+    logit(survBothS[i, k-1]) <- alpha.survBothS + beta.survBothS1 * TEMP[i]+ beta.survBothS2 * RMI[i]
+    logit(colEmptyS[i, k-1]) <- alpha.colEmptyS + beta.colEmptyS1 * TEMP[i]+ beta.colEmptyS2 * RMI[i]
+    logit(colOccS[i, k-1]) <- alpha.colOccS + beta.colOccS1 * TEMP[i]+ beta.colOccS2 * RMI[i]
+
+    muv[i,k-1] <- (1-z[i,k-1])  * survAloneC[i, k-1]* v[i,k-1] +
+                    z[i,k-1]      * survBothC[i,k-1] * v[i,k-1] +
+                    (1- z[i,k-1]) * colEmptyC[i, k-1] * (1-v[i,k-1]) +
+                    z[i,k-1]      * colOccC[i, k-1]   * (1-v[i,k-1])
+
+    logit(survAloneC[i, k-1]) <- alpha.survAloneC + beta.survAloneC1 * TEMP[i]+ beta.survAloneC2 * RMI[i]
+    logit(survBothC[i, k-1]) <- alpha.survBothC + beta.survBothC1 * TEMP[i]+ beta.survBothC2 * RMI[i]
+    logit(colEmptyC[i, k-1]) <- alpha.colEmptyC + beta.colEmptyC1 * TEMP[i]+ beta.colEmptyC2 * RMI[i]
+    logit(colOccC[i, k-1]) <- alpha.colOccC + beta.colOccC1 * TEMP[i]+ beta.colOccC2 * RMI[i]
+
+  } # i
+} # k
+
+###########################################
+########  OBSERVATION MODEL ###############
+###########################################
+
+for(k in 1:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over the R sites
+    for(j in 1:J) { # Loop over replicates
+
+      # Observation model for the actual observations
+      yS[i,j,k] ~ dbern(eff.pS[i,j,k])	# Detection-nondetection at i and j
+
+      # Observation model for the actual observations
+      yC[i,j,k] ~ dbern(eff.pC[i,j,k])	# Detection-nondetection at i and j
+
+      # Conditional detection probabilities
+      eff.pS[i,j,k] <- z[i,k] * pS[i,j,k] * (1 - v[i,k]) +
+                        z[i,k] * rSC[i,j,k] * v[i,k] * yC[i,j,k] +
+                        z[i,k] * rSc[i,j,k] * v[i,k] * (1-yC[i,j,k])
+
+      # Use logit link function
+      logit(pS[i,j,k])  <- alpha.pS
+      logit(rSC[i,j,k]) <- alpha.rSC
+      logit(rSc[i,j,k]) <- alpha.rSc
+
+      # Conditional detection probabilities
+      eff.pC[i,j,k] <- (1 - z[i,k]) * pC[i,j,k] * v[i,k] +
+                          z[i,k] * rC[i,j,k] * v[i,k]
+
+      # Use logit link function
+      logit(pC[i,j,k]) <- alpha.pC
+      logit(rC[i,j,k]) <- alpha.rC
+
+     # # Simulate data
+     # yS.new[i,j,k] ~ dbern(eff.pS[i,j,k])	# Simulate data
+     # yC.new[i,j,k] ~ dbern(eff.pC[i,j,k])	# Simulate data
+
+
+    #log-likelihood calc
+    log.lik.pS[i,j,k]<-logdensity.bin(yS[i,j,k] , eff.pS[i,j,k], 1)
+    log.lik.pC[i,j,k]<-logdensity.bin(yC[i,j,k] , eff.pC[i,j,k], 1)
+
+    }
+  }
+}
+
+# Sum across log-likes
+for(i in 1:N){
+  LL[i] <- sum(log.lik.pS[i,,]) + sum(log.lik.pC[i,,])
+}
+
+##############################################################
+###########  Bayesian posterior predictive check ###############
+#############################################################
+#for(k in 1:Yr) {  # Loop over years
+#  for(i in 1:N) { # Loop over the R sites
+#    for(j in 1:J){
+#      Presi.S[i,j,k] <- abs(yS[i,j,k]-eff.pS[i,j,k])	 # Absolute residual
+#      Presi.new.S[i,j,k] <- abs(yS.new[i,j,k]-eff.pS[i,j,k])	 # Absolute residual
+#
+#      Presi.C[i,j,k] <- abs(yC[i,j,k]-eff.pC[i,j,k])	 # Absolute residual
+#      Presi.new.C[i,j,k] <- abs(yC.new[i,j,k]-eff.pC[i,j,k])	 # Absolute residual
+#    }
+#  }
+#}
+#
+#
+#zzzfit <-  sum(Presi.S[ ,  , ]) + sum(Presi.C[, ,])
+#zzzfit.new <- sum(Presi.new.S[,, ]) + sum(Presi.new.C[,,])
+#
+#
+### Calculate the discrepancy measure, defined as the mean(zzzfit2 > zzzfit.new2)
+#zzz.diff <- step(zzzfit - zzzfit.new)
+
+}
+

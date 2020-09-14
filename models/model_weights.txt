@@ -1,0 +1,621 @@
+
+model{
+
+############## Priors
+
+
+# 1. Abiotic biotic model ------------------------------------------
+
+
+# Initial occupancy probability (season 1)
+AB.alpha.psiSC ~ dnorm(0, 0.368)
+AB.alpha.psiSc ~ dnorm(0, 0.368)
+AB.alpha.psiC ~ dnorm(0, 0.368)
+
+# Intercept - Pshen
+AB.alpha.survAloneS ~ dnorm(0, 0.368)
+AB.alpha.survBothS ~ dnorm(0, 0.368)
+AB.alpha.colEmptyS ~ dnorm(0, 0.368)
+AB.alpha.colOccS ~ dnorm(0, 0.368)
+
+# TEMP slope - Pshen
+AB.beta.survAloneS1 ~ dnorm(0, 0.368)
+AB.beta.survBothS1 ~ dnorm(0, 0.368)
+AB.beta.colEmptyS1 ~ dnorm(0, 0.368)
+AB.beta.colOccS1 ~ dnorm(0, 0.368)
+
+# RMI slope - Pshen
+AB.beta.survAloneS2 ~ dnorm(0, 0.368)
+AB.beta.survBothS2 ~ dnorm(0, 0.368)
+AB.beta.colEmptyS2 ~ dnorm(0, 0.368)
+AB.beta.colOccS2 ~ dnorm(0, 0.368)
+
+# Intercept - Pcin
+AB.alpha.survAloneC ~ dnorm(0, 0.368)
+AB.alpha.survBothC ~ dnorm(0, 0.368)
+AB.alpha.colEmptyC ~ dnorm(0, 0.368)
+AB.alpha.colOccC ~ dnorm(0, 0.368)
+
+# TEMP slope - Pcin
+AB.beta.survAloneC1 ~ dnorm(0, 0.368)
+AB.beta.survBothC1 ~ dnorm(0, 0.368)
+AB.beta.colEmptyC1 ~ dnorm(0, 0.368)
+AB.beta.colOccC1 ~ dnorm(0, 0.368)
+
+# RMI slope - Pcin
+AB.beta.survAloneC2 ~ dnorm(0, 0.368)
+AB.beta.survBothC2 ~ dnorm(0, 0.368)
+AB.beta.colEmptyC2 ~ dnorm(0, 0.368)
+AB.beta.colOccC2 ~ dnorm(0, 0.368)
+
+# Detection parameters
+AB.alpha.pS ~ dnorm(0, 0.368)
+AB.alpha.rSC~ dnorm(0, 0.368)
+AB.alpha.rSc~ dnorm(0, 0.368)
+AB.alpha.rC ~ dnorm(0, 0.368)
+AB.alpha.pC ~ dnorm(0, 0.368)
+
+
+
+# 2. Abiotic model ------------------------------------------
+
+
+
+# Initial occupancy
+A.alpha.psiS ~ dnorm(0, 0.368)
+A.alpha.psiC ~ dnorm(0, 0.368)
+
+# Intercept - Pshen
+A.alpha.survS ~ dnorm(0, 0.368)
+A.alpha.colS ~ dnorm(0, 0.368)
+
+# Temp slope - Pshen
+A.beta.survS1 ~ dnorm(0, 0.368)
+A.beta.colS1 ~ dnorm(0, 0.368)
+
+# RMI slope - Pshen
+A.beta.survS2 ~ dnorm(0, 0.368)
+A.beta.colS2 ~ dnorm(0, 0.368)
+
+# Intercept - Pcin
+A.alpha.survC ~ dnorm(0, 0.368)
+A.alpha.colC ~ dnorm(0, 0.368)
+
+# Temp slope - Pcin
+A.beta.survC1 ~ dnorm(0, 0.368)
+A.beta.colC1 ~ dnorm(0, 0.368)
+
+# RMI slope - Pcin
+A.beta.survC2 ~ dnorm(0, 0.368)
+A.beta.colC2 ~ dnorm(0, 0.368)
+
+# Detection
+A.alpha.pS ~ dnorm(0, 0.368)
+A.alpha.pC ~ dnorm(0, 0.368)
+
+
+
+# 3. Biotic model ------------------------------------------
+
+
+
+# Initial occupancy
+B.alpha.psiSC ~ dnorm(0, 0.368)
+B.alpha.psiSc ~ dnorm(0, 0.368)
+B.alpha.psiC ~ dnorm(0, 0.368)
+
+# Intercept - Pshen
+B.alpha.survAloneS ~ dnorm(0, 0.368)
+B.alpha.survBothS ~ dnorm(0, 0.368)
+B.alpha.colEmptyS ~ dnorm(0, 0.368)
+B.alpha.colOccS ~ dnorm(0, 0.368)
+
+# Intercept - Pcin
+B.alpha.survAloneC ~ dnorm(0, 0.368)
+B.alpha.survBothC ~ dnorm(0, 0.368)
+B.alpha.colEmptyC ~ dnorm(0, 0.368)
+B.alpha.colOccC ~ dnorm(0, 0.368)
+
+# Detection
+B.alpha.pS ~ dnorm(0, 0.368)
+B.alpha.rSC~ dnorm(0, 0.368)
+B.alpha.rSc~ dnorm(0, 0.368)
+B.alpha.rC ~ dnorm(0, 0.368)
+B.alpha.pC ~ dnorm(0, 0.368)
+
+
+
+# 4. Null model ------------------------------------------
+
+
+
+# Initial occupancy
+N.alpha.psiS ~ dnorm(0, 0.368)
+N.alpha.psiC ~ dnorm(0, 0.368)
+
+# Intercept - Pshen
+N.alpha.survS ~ dnorm(0, 0.368)
+N.alpha.colS ~ dnorm(0, 0.368)
+
+# Intercept - Pcin
+N.alpha.survC ~ dnorm(0, 0.368)
+N.alpha.colC ~ dnorm(0, 0.368)
+
+# Detection
+N.alpha.pS ~ dnorm(0, 0.368)
+N.alpha.pC ~ dnorm(0, 0.368)
+
+
+
+
+###########################################
+###########  ECOLOGY MODEL ################
+###########################################
+
+
+
+# 1. Abiotic biotic model ------------------------------------------
+
+
+## SEASON 1
+
+for(i in 1:N){    # Loop over sites
+
+  # True state model for the partially observed true state
+  # True occupancy z at site i  # Shenandoah sal
+  AB.z[i,1] ~ dbern(AB.psi.S[i])
+
+  AB.psi.S[i] <- AB.psiSC[i] * AB.v[i,1] +
+              AB.psiSc[i] * (1 - AB.v[i,1])
+
+  logit(AB.psiSC[i]) <- AB.alpha.psiSC
+  logit(AB.psiSc[i]) <- AB.alpha.psiSc
+
+  # True occupancy v at site i  # Cinereus sal
+  AB.v[i,1] ~ dbern(AB.psiC[i])
+
+  logit(AB.psiC[i]) <- AB.alpha.psiC
+
+} #i
+
+## SEASON 2 & ON
+
+for(k in 2:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over sites
+
+    # True state model for the partially observed true state
+    AB.z[i,k] ~ dbern(AB.muz[i,k-1])		# True occupancy z at site i
+
+    AB.v[i,k] ~ dbern(AB.muv[i,k-1])		# True occupancy v at site i
+
+    AB.muz[i,k-1] <- AB.z[i,k-1] * AB.survAloneS[i, k-1] * (1-AB.v[i,k-1]) +
+                  AB.z[i,k-1] * AB.survBothS[i, k-1]      * AB.v[i,k-1] +
+                  (1- AB.z[i,k-1]) * AB.colEmptyS[i, k-1] * (1-AB.v[i,k-1]) +
+                  (1- AB.z[i,k-1]) * AB.colOccS[i, k-1]   * AB.v[i,k-1]
+
+    logit(AB.survAloneS[i, k-1]) <- AB.alpha.survAloneS +
+                                    AB.beta.survAloneS1 * TEMP[i] +
+                                    AB.beta.survAloneS2 * RMI[i]
+    logit(AB.survBothS[i, k-1]) <- AB.alpha.survBothS +
+                                   AB.beta.survBothS1 * TEMP[i] +
+                                   AB.beta.survBothS2 * RMI[i]
+    logit(AB.colEmptyS[i, k-1]) <- AB.alpha.colEmptyS +
+                                   AB.beta.colEmptyS1 * TEMP[i] +
+                                   AB.beta.colEmptyS2 * RMI[i]
+    logit(AB.colOccS[i, k-1]) <- AB.alpha.colOccS +
+                                 AB.beta.colOccS1 * TEMP[i] +
+                                 AB.beta.colOccS2 * RMI[i]
+
+    AB.muv[i,k-1] <- (1-AB.z[i,k-1])  * AB.survAloneC[i, k-1]* AB.v[i,k-1] +
+                    AB.z[i,k-1]      * AB.survBothC[i,k-1] * AB.v[i,k-1] +
+                    (1- AB.z[i,k-1]) * AB.colEmptyC[i, k-1] * (1-AB.v[i,k-1]) +
+                    AB.z[i,k-1]      * AB.colOccC[i, k-1]   * (1-AB.v[i,k-1])
+
+    logit(AB.survAloneC[i, k-1]) <- AB.alpha.survAloneC +
+                                    AB.beta.survAloneC1 * TEMP[i] +
+                                    AB.beta.survAloneC2 * RMI[i]
+    logit(AB.survBothC[i, k-1]) <- AB.alpha.survBothC +
+                                   AB.beta.survBothC1 * TEMP[i]+
+                                   AB.beta.survBothC2 * RMI[i]
+    logit(AB.colEmptyC[i, k-1]) <- AB.alpha.colEmptyC +
+                                   AB.beta.colEmptyC1 * TEMP[i] +
+                                   AB.beta.colEmptyC2 * RMI[i]
+    logit(AB.colOccC[i, k-1]) <- AB.alpha.colOccC +
+                                 AB.beta.colOccC1 * TEMP[i] +
+                                 AB.beta.colOccC2 * RMI[i]
+
+  } # i
+} # k
+
+
+# 2. Abiotic model ------------------------------------------
+
+
+
+for(i in 1:N){    # Loop over sites
+# True state model for the partially observed true state
+# True occupancy z at site i  # Shenandoah sal
+  A.z[i,1] ~ dbern(A.psiS[i])
+
+    logit(A.psiS[i]) <- A.alpha.psiS
+
+# True occupancy v at site i  # Cinereus sal
+  A.v[i,1] ~ dbern(A.psiC[i])
+    logit(A.psiC[i]) <- A.alpha.psiC
+
+} #i
+
+## SEASON 2 & ON
+
+for(k in 2:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over sites
+
+    # True state model for the partially observed true state
+    A.z[i,k] ~ dbern(A.muz[i,k-1])    # True occupancy z at site i   # Shenandoah sal
+
+    A.v[i,k] ~ dbern(A.muv[i,k-1])    # True occupancy v at site i  # Cinereus sal
+
+    A.muz[i,k-1] <- A.z[i,k-1] * A.survS[i, k-1]  +
+                  (1- A.z[i,k-1]) * A.colS[i, k-1]
+
+      logit(A.survS[i, k-1]) <- A.alpha.survS +
+                                A.beta.survS1 * TEMP[i] +
+                                A.beta.survS2 * RMI[i]
+      logit(A.colS[i, k-1]) <- A.alpha.colS +
+                               A.beta.colS1 * TEMP[i]+
+                               A.beta.colS2 * RMI[i]
+
+    A.muv[i,k-1] <- A.survC[i, k-1]* A.v[i,k-1] +
+                  A.colC[i, k-1] * (1-A.v[i,k-1])
+
+      logit(A.survC[i, k-1]) <- A.alpha.survC +
+                                A.beta.survC1 * TEMP[i]+
+                                A.beta.survC2 * RMI[i]
+      logit(A.colC[i, k-1]) <- A.alpha.colC +
+                               A.beta.colC1 * TEMP[i] +
+                               A.beta.colC2 * RMI[i]
+
+  } # i
+} # k
+
+
+# 3. Biotic model ------------------------------------------
+
+
+for(i in 1:N){    # Loop over sites
+# True state model for the partially observed true state
+  B.z[i,1] ~ dbern(B.psi.S[i])
+
+    B.psi.S[i] <- B.psiSC[i] * B.v[i,1] +
+                B.psiSc[i] * (1 - B.v[i,1])
+
+    logit(B.psiSC[i]) <- B.alpha.psiSC
+    logit(B.psiSc[i]) <- B.alpha.psiSc
+
+# True occupancy v at site i  # Cinereus sal
+  B.v[i,1] ~ dbern(B.psiC[i])
+    logit(B.psiC[i]) <- B.alpha.psiC
+
+} #i
+
+## SEASON 2 & ON
+
+for(k in 2:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over sites
+
+    # True state model for the partially observed true state
+    B.z[i,k] ~ dbern(B.muz[i,k-1])    # True occupancy z at site i   # Shenandoah sal
+
+    B.v[i,k] ~ dbern(B.muv[i,k-1])    # True occupancy v at site i  # Cinereus sal
+
+    B.muz[i,k-1] <- B.z[i,k-1] * B.survAloneS[i, k-1] * (1-B.v[i,k-1]) +
+                  B.z[i,k-1] * B.survBothS[i, k-1]      * B.v[i,k-1] +
+                  (1- B.z[i,k-1]) * B.colEmptyS[i, k-1] * (1-B.v[i,k-1]) +
+                  (1- B.z[i,k-1]) * B.colOccS[i, k-1]   * B.v[i,k-1]
+
+      logit(B.survAloneS[i, k-1]) <- B.alpha.survAloneS
+      logit(B.survBothS[i, k-1]) <- B.alpha.survBothS
+      logit(B.colEmptyS[i, k-1]) <- B.alpha.colEmptyS
+      logit(B.colOccS[i, k-1]) <- B.alpha.colOccS
+
+    B.muv[i,k-1] <- (1-B.z[i,k-1])  * B.survAloneC[i, k-1]* B.v[i,k-1] +
+                  B.z[i,k-1]      * B.survBothC[i,k-1] * B.v[i,k-1] +
+                  (1- B.z[i,k-1]) * B.colEmptyC[i, k-1] * (1-B.v[i,k-1]) +
+                  B.z[i,k-1]      * B.colOccC[i, k-1]   * (1-B.v[i,k-1])
+
+      logit(B.survAloneC[i, k-1]) <- B.alpha.survAloneC
+      logit(B.survBothC[i, k-1]) <- B.alpha.survBothC
+      logit(B.colEmptyC[i, k-1]) <- B.alpha.colEmptyC
+      logit(B.colOccC[i, k-1]) <- B.alpha.colOccC
+
+  } # i
+} # k
+
+
+# 4. Null model ------------------------------------------
+
+
+
+
+for(i in 1:N){    # Loop over sites
+# True state model for the partially observed true state
+# True occupancy z at site i  # Shenandoah sal
+  N.z[i,1] ~ dbern(N.psiS[i])
+
+    logit(N.psiS[i]) <- N.alpha.psiS
+
+# True occupancy v at site i  # Cinereus sal
+    N.v[i,1] ~ dbern(N.psiC[i])
+    logit(N.psiC[i]) <- N.alpha.psiC
+
+} #i
+
+## SEASON 2 & ON
+
+for(k in 2:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over sites
+
+    # True state model for the partially observed true state
+    N.z[i,k] ~ dbern(N.muz[i,k-1])    # True occupancy z at site i   # Shenandoah sal
+
+    N.v[i,k] ~ dbern(N.muv[i,k-1])    # True occupancy v at site i  # Cinereus sal
+
+    N.muz[i,k-1] <- N.z[i,k-1] * N.survS[i, k-1] +
+                (1- N.z[i,k-1]) * N.colS[i, k-1]
+
+    logit(N.survS[i, k-1]) <- N.alpha.survS
+    logit(N.colS[i, k-1]) <- N.alpha.colS
+
+    N.muv[i,k-1] <- N.survC[i, k-1]* N.v[i,k-1] +
+                 N.colC[i, k-1] * (1-N.v[i,k-1])
+
+    logit(N.survC[i, k-1]) <- N.alpha.survC
+    logit(N.colC[i, k-1]) <- N.alpha.colC
+
+  } # i
+} # k
+
+
+###########################################
+########  OBSERVATION MODEL ###############
+###########################################
+
+
+# 1. Abiotic Biotic model ------------------------------------------
+
+
+for(k in 1:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over the R sites
+    for(j in 1:J) { # Loop over replicates
+
+      # Observation model for the actual observations
+      AB.yS[i,j,k] ~ dbern(AB.eff.pS[i,j,k])
+
+      # Observation model for the actual observations
+      AB.yC[i,j,k] ~ dbern(AB.eff.pC[i,j,k])
+
+      # Conditional detection probabilities
+      AB.eff.pS[i,j,k] <- AB.z[i,k] * AB.pS[i,j,k] * (1 - AB.v[i,k]) +
+                          AB.z[i,k] * AB.rSC[i,j,k] * AB.v[i,k] * AB.yC[i,j,k] +
+                          AB.z[i,k] * AB.rSc[i,j,k] * AB.v[i,k] * (1-AB.yC[i,j,k])
+
+      # Use logit link function
+      logit(AB.pS[i,j,k])  <- AB.alpha.pS
+      logit(AB.rSC[i,j,k]) <- AB.alpha.rSC
+      logit(AB.rSc[i,j,k]) <- AB.alpha.rSc
+
+      # Conditional detection probabilities
+      AB.eff.pC[i,j,k] <- (1 - AB.z[i,k]) * AB.pC[i,j,k] * AB.v[i,k] +
+                          AB.z[i,k] * AB.rC[i,j,k] * AB.v[i,k]
+
+      # Use logit link function
+      logit(AB.pC[i,j,k]) <- AB.alpha.pC
+      logit(AB.rC[i,j,k]) <- AB.alpha.rC
+
+
+    #log-likelihood calc
+    AB.log.lik.pS[i,j,k]<-logdensity.bin(AB.yS[i,j,k] , AB.eff.pS[i,j,k], 1)
+    #AB.log.lik.pC[i,j,k]<-logdensity.bin(AB.yC[i,j,k] , AB.eff.pC[i,j,k], 1)
+
+    }
+
+    # Sum across log-likes
+   AB.LL[i, k] <- sum(AB.log.lik.pS[i, ,k]) #+ sum(AB.log.lik.pC[i, ,k])
+
+  }
+}
+
+
+# 2. Abiotic model ------------------------------------------
+
+
+
+for(k in 1:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over the R sites
+    for(j in 1:J) { # Loop over replicates
+
+      # Observation model for the actual observations
+      A.yS[i,j,k] ~ dbern(A.eff.pS[i,j,k])  # Detection-nondetection at i and j
+
+      # Observation model for the actual observations
+      A.yC[i,j,k] ~ dbern(A.eff.pC[i,j,k])  # Detection-nondetection at i and j
+
+      # Conditional detection probabilities
+      A.eff.pS[i,j,k] <- A.z[i,k] * A.pS[i,j,k]
+
+      # Conditional detection probabilities
+      A.eff.pC[i,j,k] <- A.pC[i,j,k] * A.v[i,k]
+
+      # Use logit
+      logit(A.pS[i,j,k]) <- A.alpha.pS
+      logit(A.pC[i,j,k]) <- A.alpha.pC
+
+    #log-likelihood calc
+    A.log.lik.pS[i,j,k]<-logdensity.bin(A.yS[i,j,k] , A.eff.pS[i,j,k], 1)
+    #A.log.lik.pC[i,j,k]<-logdensity.bin(A.yC[i,j,k] , A.eff.pC[i,j,k], 1)
+
+    }
+  # Sum across log-likes
+  A.LL[i,k] <- sum(A.log.lik.pS[i,,k]) #+ sum(A.log.lik.pC[i,,k])
+  }
+}
+
+
+# 3. Biotic model ------------------------------------------
+
+
+
+
+for(k in 1:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over the R sites
+    for(j in 1:J) { # Loop over replicates
+
+      # Observation model for the actual observations
+      B.yS[i,j,k] ~ dbern(B.eff.pS[i,j,k])  # Detection-nondetection at i and j
+
+      # Observation model for the actual observations
+      B.yC[i,j,k] ~ dbern(B.eff.pC[i,j,k])  # Detection-nondetection at i and j
+
+      # Conditional detection probabilities
+      B.eff.pS[i,j,k] <- B.z[i,k] * B.pS[i,j,k] * (1 - B.v[i,k]) +
+                        B.z[i,k] * B.rSC[i,j,k] * B.v[i,k] * B.yC[i,j,k] +
+                        B.z[i,k] * B.rSc[i,j,k] * B.v[i,k] * (1-B.yC[i,j,k])
+
+      # Use logit link function
+      logit(B.pS[i,j,k])  <- B.alpha.pS
+      logit(B.rSC[i,j,k]) <- B.alpha.rSC
+      logit(B.rSc[i,j,k]) <- B.alpha.rSc
+
+      # Conditional detection probabilities
+      B.eff.pC[i,j,k] <- (1 - B.z[i,k]) * B.pC[i,j,k] * B.v[i,k] +
+                          B.z[i,k] * B.rC[i,j,k] * B.v[i,k]
+
+      # Use logit link function
+      logit(B.pC[i,j,k]) <- B.alpha.pC
+      logit(B.rC[i,j,k]) <- B.alpha.rC
+
+    #log-likelihood calc
+    B.log.lik.pS[i,j,k]<-logdensity.bin(B.yS[i,j,k] , B.eff.pS[i,j,k], 1)
+    #B.log.lik.pC[i,j,k]<-logdensity.bin(B.yC[i,j,k] , B.eff.pC[i,j,k], 1)
+
+    }
+  # Sum across log-likes
+  B.LL[i,k] <- sum(B.log.lik.pS[i,,k]) #+ sum(B.log.lik.pC[i,,k])
+
+  }
+}
+
+
+
+# 4. Null model ------------------------------------------
+
+
+
+
+for(k in 1:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over the R sites
+    for(j in 1:J) { # Loop over replicates
+
+    # Observation model for the actual observations
+    N.yS[i,j,k] ~ dbern(N.eff.pS[i,j,k])  # Detection-nondetection at i and j
+
+    # Observation model for the actual observations
+    N.yC[i,j,k] ~ dbern(N.eff.pC[i,j,k])  # Detection-nondetection at i and j
+
+    # Conditional detection probabilities
+    N.eff.pS[i,j,k] <- N.z[i,k] * N.pS[i,j,k]
+
+    # Conditional detection probabilities
+    N.eff.pC[i,j,k] <-  N.pC[i,j,k] * N.v[i,k]
+
+    # Use logit
+    logit(N.pS[i,j,k]) <- N.alpha.pS
+    logit(N.pC[i,j,k]) <- N.alpha.pC
+
+
+    #log-likelihood calc
+    N.log.lik.pS[i,j,k]<-logdensity.bin(N.yS[i,j,k] , N.eff.pS[i,j,k], 1)
+    #N.log.lik.pC[i,j,k]<-logdensity.bin(N.yC[i,j,k] , N.eff.pC[i,j,k], 1)
+
+    }
+    # Sum across log-likes
+    N.LL[i,k] <- sum(N.log.lik.pS[i,,k]) #+ sum(N.log.lik.pC[i,,k])
+
+  }
+}
+
+
+
+
+#############################################################
+###########  Model weights ##################################
+#############################################################
+
+for(i in 1:N){
+
+# Initial model weights - need to sum to 1
+    # All equal
+      AB.logit.w[i,1] ~ dnorm(0, 0.368)
+      A.logit.w[i,1]  ~ dnorm(0, 0.368)
+      B.logit.w[i,1]  ~ dnorm(0, 0.368)
+      N.logit.w[i,1]  ~ dnorm(0, 0.368)
+
+  # Convert from logit to probability scale - making sure they all sum to 1
+    # Use of multinomial
+   AB.w[i,1] <- exp(AB.logit.w[i,1]) / (exp(AB.logit.w[i,1]) +
+                                         exp(A.logit.w[i,1]) +
+                                         exp(B.logit.w[i,1]) +
+                                         exp(N.logit.w[i,1]))
+   A.w[i,1] <- exp(A.logit.w[i,1]) / (exp(AB.logit.w[i,1]) +
+                                       exp(A.logit.w[i,1]) +
+                                       exp(B.logit.w[i,1]) +
+                                       exp(N.logit.w[i,1]))
+  B.w[i,1] <- exp(B.logit.w[i,1]) / (exp(AB.logit.w[i,1]) +
+                                      exp(A.logit.w[i,1]) +
+                                      exp(B.logit.w[i,1]) +
+                                      exp(N.logit.w[i,1]))
+  N.w[i,1] <- exp(N.logit.w[i,1]) / (exp(AB.logit.w[i,1]) +
+                                      exp(A.logit.w[i,1]) +
+                                      exp(B.logit.w[i,1]) +
+                                      exp(N.logit.w[i,1]))
+
+## Weighted probability of each model
+    AB.WP[i,1] <- AB.LL[i,1] * AB.w[i,1]
+    A.WP[i,1]  <- A.LL[i,1]  * A.w[i,1]
+    B.WP[i,1]  <- B.LL[i,1]  * B.w[i,1]
+    N.WP[i,1]  <- N.LL[i,1]  * N.w[i,1]
+
+}
+
+
+for(i in 1:N){
+
+   for(k in 2){
+
+# Updating the model weights via Bayes' Theorem ******
+    AB.w[i,k]  <- AB.WP[i,k-1] / (AB.WP[i,k-1] + A.WP[i,k-1] + B.WP[i,k-1]+ N.WP[i,k-1])
+    A.w[i,k]   <- A.WP[i,k-1]  / (AB.WP[i,k-1] + A.WP[i,k-1] + B.WP[i,k-1]+ N.WP[i,k-1])
+    B.w[i,k]   <- B.WP[i,k-1]  / (AB.WP[i,k-1] + A.WP[i,k-1] + B.WP[i,k-1]+ N.WP[i,k-1])
+    N.w[i,k]   <- N.WP[i,k-1]  / (AB.WP[i,k-1] + A.WP[i,k-1] + B.WP[i,k-1]+ N.WP[i,k-1])
+
+## Weighted probability of each model
+#   AB.WP[i,k] <- AB.LL[i,k] * AB.w[i,k]
+#   A.WP[i,k]  <- A.LL[i,k]  * A.w[i,k]
+#   B.WP[i,k]  <- B.LL[i,k]  * B.w[i,k]
+#   N.WP[i,k]  <- N.LL[i,k]  * N.w[i,k]
+
+    }
+
+}
+
+## Then take mean across all the sites for each year
+#for(k in 1:Yr){
+#    AB.w.mean[k] <- mean(AB.w[,k])
+#    A.w.mean[k]  <- mean(A.w[,k] )
+#    B.w.mean[k]  <- mean(B.w[,k] )
+#    N.w.mean[k]  <- mean(N.w[,k] )
+#}
+#
+
+}
+
