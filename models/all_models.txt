@@ -166,7 +166,7 @@ for(i in 1:N){    # Loop over sites
   AB.z[i,1] ~ dbern(AB.psi.S[i])
 
   AB.psi.S[i] <- AB.psiSC[i] * AB.v[i,1] +
-              AB.psiSc[i] * (1 - AB.v[i,1])
+                 AB.psiSc[i] * (1 - AB.v[i,1])
 
   logit(AB.psiSC[i]) <- AB.alpha.psiSC
   logit(AB.psiSc[i]) <- AB.alpha.psiSc
