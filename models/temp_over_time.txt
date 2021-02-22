@@ -1,0 +1,21 @@
+## temp model to understand full model biases
+model{
+
+a~dnorm(3,0.5)
+b1~ dnorm(2,0.5)
+
+for (k in 1:year){
+ for(i in 1:site) {
+  for (j in 1:obs) {
+    
+
+y[i,j,k] ~ dbern(pr[i,j,k]) 
+
+logit(pr[i,j,k]) <- a + b1*TEMP[i,j,k]
+
+
+
+    }
+   }
+  }
+}

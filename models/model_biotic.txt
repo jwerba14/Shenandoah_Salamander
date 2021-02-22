@@ -122,25 +122,7 @@ for(k in 1:Yr) {  # Loop over years
   }
 }
 
-############################################################
-#########  Bayesian posterior predictive check ###############
-###########################################################
-for(k in 1:Yr) {  # Loop over years
-  for(i in 1:N) { # Loop over the R sites
-    for(j in 1:J){ 
-      Presi.S[i,j,k] <- abs(yS[i,j,k]-eff.pS[i,j,k])	 # Absolute residual
-      Presi.new.S[i,j,k] <- abs(yS.new[i,j,k]-eff.pS[i,j,k])	 # Absolute residual
 
-      Presi.C[i,j,k] <- abs(yC[i,j,k]-eff.pC[i,j,k])	 # Absolute residual
-      Presi.new.C[i,j,k] <- abs(yC.new[i,j,k]-eff.pC[i,j,k])	 # Absolute residual
-    }
-  }
-}
-zzzfit <-  sum(Presi.S[,,]) + sum(Presi.C[,,])
-zzzfit.new <- sum(Presi.new.S[,,]) + sum(Presi.new.C[,,])
-
-# Calculate the discrepancy measure, defined as the mean(p.fit > p.fitnew) 
-zzz.diff <- step(zzzfit - zzzfit.new)
 
 }
 

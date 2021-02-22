@@ -1,0 +1,116 @@
+
+model{
+
+############## Priors
+
+# 1. Abiotic biotic model ------------------------------------------
+
+
+
+alpha.psiSC ~ dnorm(true_alpha.psiSC, 0.5)
+alpha.psiSc ~ dnorm(true_alpha.psiSc, 0.5)
+alpha.psiC ~ dnorm(true_alpha.psiC, 0.5)
+
+# Intercept
+alpha.survAloneS ~ dnorm(true_alpha.survAloneS, 0.5)
+alpha.survBothS ~ dnorm(true_alpha.survBothS, 0.5)
+alpha.colEmptyS ~ dnorm(true_alpha.colEmptyS, 0.5)
+alpha.colOccS ~ dnorm(true_alpha.colOccS, 0.5)
+
+# TEMP slope
+beta.survAloneS1 ~ dnorm(true_beta.survAloneS1, 0.5)
+beta.survBothS1 ~ dnorm(true_beta.survBothS1, 0.5)
+beta.colEmptyS1 ~ dnorm(true_beta.colEmptyS1, 0.5)
+beta.colOccS1 ~ dnorm(true_beta.colOccS1, 0.5)
+
+
+# Intercept
+alpha.survAloneC ~ dnorm(true_alpha.survAloneC, 0.5)
+alpha.survBothC ~ dnorm(true_alpha.survBothC, 0.5)
+alpha.colEmptyC ~ dnorm(true_alpha.colEmptyC, 0.5)
+alpha.colOccC ~ dnorm(true_alpha.colOccC, 0.5)
+
+# TEMP slope
+beta.survAloneC1 ~ dnorm(true_beta.survAloneC1, 0.5)
+beta.survBothC1 ~ dnorm(true_beta.survBothC1, 0.5)
+beta.colEmptyC1 ~ dnorm(true_beta.colEmptyC1, 0.5)
+beta.colOccC1 ~ dnorm(true_beta.colOccC1, 0.5)
+
+
+
+
+# 2. Abiotic model ------------------------------------------
+
+
+
+
+
+# 3. Biotic model ------------------------------------------
+
+
+
+
+
+
+###########################################
+###########  ECOLOGY MODEL ################
+###########################################
+
+## SEASON 1
+
+for(i in 1:N){    # Loop over sites
+  # True state model for the partially observed true state
+  # True occupancy z at site i  # Shenandoah sal
+  z[i,1] ~ dbern(psi.S[i])
+
+  psi.S[i] <- psiSC[i] * v[i,1] +
+              psiSc[i] * (1 - v[i,1])
+
+  logit(psiSC[i]) <- alpha.psiSC
+  logit(psiSc[i]) <- alpha.psiSc
+
+  # True occupancy v at site i  # Cinereus sal
+  v[i,1] ~ dbern(psiC[i])
+
+  logit(psiC[i]) <- alpha.psiC
+
+} #i
+
+## SEASON 2 & ON
+
+for(k in 2:Yr) {  # Loop over years
+  for(i in 1:N) { # Loop over sites
+
+    # True state model for the partially observed true state
+    z[i,k] ~ dbern(muz[i,k-1])		# True occupancy z at site i   # Shenandoah sal
+
+    v[i,k] ~ dbern(muv[i,k-1])		# True occupancy v at site i  # Cinereus sal
+
+    muz[i,k-1] <- z[i,k-1] * survAloneS[i, k-1] * (1-v[i,k-1]) +
+                  z[i,k-1] * survBothS[i, k-1]      * v[i,k-1] +
+                  (1- z[i,k-1]) * colEmptyS[i, k-1] * (1-v[i,k-1]) +
+                  (1- z[i,k-1]) * colOccS[i, k-1]   * v[i,k-1]
+
+    logit(survAloneS[i, k-1]) <- alpha.survAloneS + beta.survAloneS1 * TEMP[i,k] 
+    logit(survBothS[i, k-1]) <- alpha.survBothS + beta.survBothS1 * TEMP[i,k]
+    logit(colEmptyS[i, k-1]) <- alpha.colEmptyS + beta.colEmptyS1 * TEMP[i,k]
+    logit(colOccS[i, k-1]) <- alpha.colOccS + beta.colOccS1 * TEMP[i,k]
+
+    muv[i,k-1] <- (1-z[i,k-1])  * survAloneC[i, k-1]* v[i,k-1] +
+                    z[i,k-1]      * survBothC[i,k-1] * v[i,k-1] +
+                    (1- z[i,k-1]) * colEmptyC[i, k-1] * (1-v[i,k-1]) +
+                    z[i,k-1]      * colOccC[i, k-1]   * (1-v[i,k-1])
+
+    logit(survAloneC[i, k-1]) <- alpha.survAloneC + beta.survAloneC1 * TEMP[i,k]
+    logit(survBothC[i, k-1]) <- alpha.survBothC + beta.survBothC1 * TEMP[i,k]
+    logit(colEmptyC[i, k-1]) <- alpha.colEmptyC + beta.colEmptyC1 * TEMP[i,k]
+    logit(colOccC[i, k-1]) <- alpha.colOccC + beta.colOccC1 * TEMP[i,k]
+  } # i
+} # k
+
+
+}
+
+
+
+

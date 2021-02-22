@@ -1,0 +1,19 @@
+## simple logistic model to understand priors
+
+model{
+
+
+a~dnorm(3,0.5)
+b1~ dnorm(2,0.5)
+
+for(i in 1:N) {
+
+y[i] ~ dbern(pr[i]) 
+
+logit(pr[i]) <- a + b1*TEMP[i] 
+
+
+}
+
+
+}

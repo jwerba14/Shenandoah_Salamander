@@ -12,6 +12,7 @@
 ###### ###### BEWARE: There are 2 iterations of the PVA ###### ###### 
 
   # Iteration 1: We used the parameter estimates from each of the 4 models below to do the PVA - but this gave weird results. It showed that the Biotic model had a higher quasi-extinction probability than the Abiotic Biotic models
+         ## JW:: but it is possible they don't compete- maybe like the rail example in Richmond et al 2010 they help each other in some way??? but I think it is right to fit to the full model... but does that mean the full model will always be better...
 
   # Iteration 2: We ONLY used the parameter estimates from the Abiotic Biotic model for each of the different scenarios. 
       # For example, in the null scenario (no competition, no climate change) - we used parameter estimates where Pshen was alone and the site was empty.
@@ -52,12 +53,15 @@ library(jagsUI)
 library(beepr)
 
 # Load data
-load("./Data/formatted_shen_cin_dat.rda")
+setwd("C:/Users/jower/OneDrive/Documents/PostDoc1/Shenandoah_Salamander/Data") ## i don't know couldn't get load to work so here we are continuously resetting wd..
+load("formatted_shen_cin_dat.rda")
 shen <- dat$shen 
 cin <- dat$cin 
 
+shen <- dat$shen[, , 1:5]
+cin <- dat$cin[, , 1:5]
 # Load temp/RMI data
-load("./Data/temp_rmi.rda")
+load("temp_rmi.rda")
 
 # 3. Bundle data & run Abiotic/Biotic model ----------------------------------------------------------
 
@@ -94,18 +98,42 @@ std_rmi <- (RMI - mean_rmi ) / sd_rmi
 # Bundle data
 win.data <- list(
   ## Parameter estimation
-  N = dim(shen)[1],
-  J =  dim(shen)[2],
-  Yr = dim(shen)[3],
-  yS = shen,
-  yC = cin,
-  TEMP = std_temp,
-  RMI = std_rmi
+  N = dim(shen)[1],  ## 209 (# of sites) 
+  J =  dim(shen)[2], # 14 (surveys in N site)
+  Yr = dim(shen)[3], #10 (years)
+  yS = shen,  ## full 0,1 matrix for p.shen sal
+  yC = cin,   ## full p.cin 
+  TEMP = std_temp, ##normalized temp of all years temp?- presumably so temp and RMI are on same scale?
+  RMI = std_rmi ## normalized RMI
+)
+
+
+## prior simulation
+shen_sim <- shen
+shen_sim[ , , ] <- NA
+
+cin_sim <- cin
+cin_sim[ , , ] <- NA
+
+shen_sim <- array(1, dim = c(209,14,20))
+shen_sim[ , , ] <- NA
+
+cin_sim <- array(1, dim = c(209,14,20))
+cin_sim[ , , ] <- NA
+win.data_sim <- list(
+  ## Parameter estimation
+  N = dim(shen_sim)[1],  ## 209 (# of sites) 
+  J =  dim(shen_sim)[2], # 14 (surveys in N site)
+  Yr = dim(shen_sim)[2], #10 (years)
+  yS = shen_sim,  ## full 0,1 matrix for p.shen sal
+  yC = cin_sim,   ## full p.cin 
+  TEMP = rep(std_temp,20), ##normalized temp of all years temp?- presumably so temp and RMI are on same scale?
+  RMI = rep(std_rmi,20) ## normalized RMI
 )
 
 # Look at structure
 str(win.data)
-
+str(win.data_sim)
 # Estimate the occupancy of Pshen
 # Take max value across surveys for each site and year combo
 Sprez <- apply(win.data$yS, c(1, 3), max, na.rm = TRUE) 
@@ -146,16 +174,17 @@ inits <- function() {list(
 
 # MCMC settings
 ni <- 5000
-nb <- 2000
-nt <- 10
+nb <- 20
+nt <- 1
 nc <- 3
 na <- 10000
-mi <- 1e6
+mi <- 1000
 
 # Run model
+setwd("C:/Users/jower/OneDrive/Documents/PostDoc1/Shenandoah_Salamander/models")
 abiotic_biotic <- autojags(data = win.data, inits = inits,  
                 parameters.to.save = params, 
-                model.file = "./Models/model_abiotic_biotic.txt", 
+                model.file = "model_abiotic_biotic.txt", 
                 n.chains = nc, 
                 n.thin = nt, 
                 n.burnin = nb, 
@@ -163,6 +192,20 @@ abiotic_biotic <- autojags(data = win.data, inits = inits,
                 max.iter = mi,
                 iter.increment = ni,
                 parallel = TRUE)
+
+
+abiotic_biotic_sim <- autojags(data = win.data_sim, inits = NULL,  
+                           parameters.to.save = params, 
+                           model.file = "model_abiotic_biotic.txt", 
+                           n.chains = nc, 
+                           n.thin = nt, 
+                           n.burnin = nb, 
+                           n.adapt = na,
+                           max.iter = mi,
+                           iter.increment = ni,
+                           parallel = TRUE)
+
+## store 60 years of simulated data, then fit to 10 and see how it compares to 60
 
 #abiotic_biotic <- jags(data = win.data, inits = inits,  
 #                parameters.to.save = params, 
@@ -178,7 +221,7 @@ abiotic_biotic <- autojags(data = win.data, inits = inits,
 beepr::beep(2)
 
 save(abiotic_biotic, file = "./ModelOutput/abiotic_biotic_output.rda")
-
+load()
 # 4. Bundle data & run Abiotic model ----------------------------------------------------------
 
 # Bundle data

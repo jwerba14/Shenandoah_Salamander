@@ -1,0 +1,18 @@
+## prior ##
+
+model{
+a ~ dnorm(0, 0.5)
+b ~ dnorm (0,0.3)
+d ~ dlnorm(0,0.5)
+
+## model ##
+
+for(i in 1:N) {
+
+y[i] ~ dnorm(mu[i], d) 
+
+mu[i] <- a + b*TEMP[i]
+
+
+}
+}

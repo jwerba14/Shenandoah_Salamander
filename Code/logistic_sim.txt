@@ -1,0 +1,34 @@
+## simple logistic model to understand simulating data with jags
+
+data{
+
+
+for(i in 1:N) {
+
+y[i] ~ dbern(true[i]) 
+
+logit(pr[i]) <- true_a + true_b1*TEMP[i] 
+
+
+}
+
+
+}
+
+model{
+
+a ~ dnorm(0,0.368)
+b1 ~ dnorm(0,0.368)
+
+
+for(i in 1:N) {
+
+y[i] ~ dbern(pr[i]) 
+
+logit(pr[i]) <- a + b1*TEMP[i] 
+
+
+}
+
+
+}

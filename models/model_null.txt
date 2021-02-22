@@ -5,29 +5,30 @@ model{
 ######### All covariate relationships are held constant across years
 
 # Informative priors from Biotic model - taken from Empty/Alone sites
+## changed to wider on 10-15 because I couldn't get it to run
 
-alpha.psiS ~ dnorm(apSm, apStau)
-apStau <- 1/(apSsd*apSsd)
-alpha.psiC ~ dnorm(apCm, apCtau)
-apCtau <- 1/(apCsd*apCsd)
+alpha.psiS ~ dnorm(0, 0.368)
+#apStau <- 1/(apSsd*apSsd)
+alpha.psiC ~ dnorm(0, 0.368)
+#apCtau <- 1/(apCsd*apCsd)
     
     
-alpha.survS ~ dnorm(asSm, asStau)
-asStau <- 1/(asSsd * asSsd)
-alpha.colS ~ dnorm(acSm, acStau)
-acStau <- 1/(acSsd * acSsd)
+alpha.survS ~ dnorm(0, 0.368)
+#asStau <- 1/(asSsd * asSsd)
+alpha.colS ~ dnorm(0, 0.368)
+#acStau <- 1/(acSsd * acSsd)
 
-alpha.survC ~ dnorm(asCm, asCtau)
-asCtau <- 1/(asCsd * asCsd)
-alpha.colC ~ dnorm(acCm, acCtau)
-acCtau <- 1/(acCsd * acCsd)
+alpha.survC ~ dnorm(0, 0.368)
+#asCtau <- 1/(asCsd * asCsd)
+alpha.colC ~ dnorm(0, 0.368)
+#acCtau <- 1/(acCsd * acCsd)
 
 ############## Detection parameters- Assume constant across years
 
-alpha.pS ~ dnorm(pSm, pStau)  
-pStau <- 1/(pSsd * pSsd)
-alpha.pC ~ dnorm(pCm, pCtau)  
-pCtau <- 1/(pCsd * pCsd)
+alpha.pS ~ dnorm(0, 0.368)
+#pStau <- 1/(pSsd * pSsd)
+alpha.pC ~ dnorm(0, 0.368)  
+#pCtau <- 1/(pCsd * pCsd)
 
 ###########################################
 ###########  ECOLOGY MODEL ################
@@ -105,26 +106,5 @@ for(k in 1:Yr) {  # Loop over years
   }
 }
 
-############################################################
-#########  Bayesian posterior predictive check ###############
-###########################################################
-for(k in 1:Yr) {  # Loop over years
-  for(i in 1:N) { # Loop over the R sites
-    for(j in 1:J){ 
-      Presi.S[i,j,k] <- abs(yS[i,j,k]-eff.pS[i,j,k])	 # Absolute residual
-      Presi.new.S[i,j,k] <- abs(yS.new[i,j,k]-eff.pS[i,j,k])	 # Absolute residual
-
-      Presi.C[i,j,k] <- abs(yC[i,j,k]-eff.pC[i,j,k])	 # Absolute residual
-      Presi.new.C[i,j,k] <- abs(yC.new[i,j,k]-eff.pC[i,j,k])	 # Absolute residual
-
-    }
-  }
-}
-zzzfit <-  sum(Presi.S[,,]) + sum(Presi.C[,,])
-zzzfit.new <- sum(Presi.new.S[,,]) + sum(Presi.new.C[,,])
-
-# Calculate the discrepancy measure, defined as the mean(p.fit > p.fitnew) 
-zzz.diff <- step(zzzfit - zzzfit.new)
-  
 }
 

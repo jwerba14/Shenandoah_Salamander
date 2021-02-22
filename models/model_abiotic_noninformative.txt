@@ -49,6 +49,8 @@ model{
 #pCtau <- 1/(pCsd * pCsd)
 
 # Non-informative priors
+## JW:: I don't understand how these are non-informative, seem pretty tight?
+
 alpha.psiS ~ dnorm(0, 0.368)
 alpha.psiC~ dnorm(0, 0.368)
 
