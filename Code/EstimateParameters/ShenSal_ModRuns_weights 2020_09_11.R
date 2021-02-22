@@ -85,6 +85,7 @@ load("../../Data/temp_rmi.rda")
 
 
 # You can run sections 3, 4, 5, 6, 7, 8, 9 or just download the model outputs
+
 load("../../ModelOutputs/first_5yrs_out.rda")
 load("../../ModelOutputs/first_6yrs_out.rda")
 load("../../ModelOutputs/first_7yrs_out.rda")
@@ -92,6 +93,8 @@ load("../../ModelOutputs/first_8yrs_out.rda")   # NOT CONVERGED - short run
 load("../../ModelOutput/first_9yrs_out.rda")   # NOT CONVERGED - short run
 
 # If downloaded - you will need to create the objects in each section ( 3 - 9) but don't run the models
+
+
 
 
 # 3. Bundle data & run first 5 years of data ----------------------------------------------------------
@@ -434,7 +437,8 @@ beepr::beep(2)
 save(out6, file = "./ModelOutput/first_6yrs_out.rda")
 
 
-load ("../../ModelOutputs/first_6yrs_out.rda")
+
+#load ("../../ModelOutputs/first_6yrs_out.rda")
 
 
 # 7. Use 7 years of data ----------------------------------------------------------
@@ -492,6 +496,10 @@ out7 <- autojags(data = win.data7, inits = inits,
                 max.iter = mi,
                 iter.increment = ni,
                 parallel = TRUE)
+<<<<<<< HEAD
+
+#out7 <- jags(data = win.data7, inits = inits,  
+=======
 
 #out7 <- jags(data = win.data7, inits = inits,  
 #             parameters.to.save = params, 
@@ -508,6 +516,86 @@ beepr::beep(2)
 
 
 # Save the output
+save(out7, file = "./ModelOutput/first_7yrs_out.rda")
+
+
+
+
+
+
+# 8. Use 8 years of data ----------------------------------------------------------
+
+
+#### Use the first 8 years of data to fit the parameters
+# 2007 - 2014
+
+shen8 <- shen[,,1:8]
+cin8 <- cin[,,1:8]
+
+# Bundle data
+win.data8 <- list(
+  ## Parameter estimation
+  N =  dim(shen8)[1],
+  J =  dim(shen8)[2],
+  Yr = dim(shen8)[3],
+  
+  AB.yS = shen8,
+  A.yS  = shen8,
+  B.yS  = shen8,
+  N.yS  = shen8,
+  
+  AB.yC = cin8,
+  A.yC  = cin8,
+  B.yC  = cin8,
+  N.yC  = cin8,
+  
+  TEMP = std_temp,
+  RMI = std_rmi
+)
+
+# Look at structure
+str(win.data8)
+
+# Initial values
+# Take max value across surveys for each site and year combo
+zinit <- apply(win.data8$AB.yS, c(1, 3), max, na.rm = TRUE) 
+# Replace in "-Inf" with 0
+zinit[zinit == "-Inf"] <- 0
+
+# Take max value across surveys for each site and year combo
+vinit <- apply(win.data8$AB.yC, c(1, 3), max, na.rm = TRUE) 
+# Replace in "-Inf" with 1
+vinit[vinit == "-Inf"] <- 1  
+
+## Run model
+out8 <- autojags(data = win.data8, inits = inits,  
+                parameters.to.save = params, 
+                model.file = "./Models/all_models.txt", 
+                n.chains = nc, 
+                n.thin = nt, 
+                n.burnin = nb, 
+                n.adapt = na,
+                max.iter = mi,
+                iter.increment = ni,
+                parallel = TRUE)
+
+#out8 <- jags(data = win.data8, inits = inits,  
+
+#             parameters.to.save = params, 
+#             model.file = "./Models/all_models.txt", 
+#             n.chains = 3, 
+#             n.thin = 1, 
+#             n.burnin = 1, 
+#             n.adapt = 1,
+#             n.iter = 2,
+#             parallel = TRUE)
+#
+
+beepr::beep(2)
+
+
+# Save the output
+
 save(out7, file = "./ModelOutput/first_7yrs_out.rda")
 
 
@@ -594,6 +682,7 @@ beepr::beep(2)
 
 
 # Save the output
+
 save(out8, file = "./ModelOutput/first_8yrs_out.rda")
 
 
@@ -707,7 +796,9 @@ AB.w[,,1] <- A.w[,,1] <- B.w[,,1] <- N.w[,,1] <- 1/4
     # Null = ./Code/Functions/N_fun.R
   # The output of these functions is the probability of detecting Pshen at each site, survey, year combination
 
+
 source("../Code/Functions/AB_fun.R")    
+
 AB.pred.6 <- AB.fun(n.year = 6,
                    out = out5,
                    win.data = win.data5)
@@ -725,6 +816,7 @@ AB.pred.10 <- AB.fun(n.year = 10,
                    win.data = win.data9)
 
 source("../Code/Functions/A_fun.R")    
+
 A.pred.6 <- A.fun(n.year = 6,
                    out = out5,
                    win.data = win.data5)
@@ -741,7 +833,9 @@ A.pred.10 <- A.fun(n.year = 10,
                     out = out9,
                     win.data = win.data9)
 
+
 source("../Functions/B_fun.R")    
+
 B.pred.6 <- B.fun(n.year = 6,
                  out = out5,
                  win.data = win.data5)
@@ -758,7 +852,9 @@ B.pred.10 <- B.fun(n.year = 10,
                     out = out9,
                     win.data = win.data9)
 
+
 source("../Functions/N_fun.R")    
+
 N.pred.6 <- N.fun(n.year = 6,
                  out = out5,
                  win.data = win.data5)
